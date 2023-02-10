@@ -39,40 +39,12 @@ mqtt:
   shutdown_message :
       topic: "esphome/nsp_bathroom/text_sensor/status/state"
       payload: shutdown
-#time:
-#  - platform: sntp
-#    id: sntp_time
-#    on_time:
-#      - seconds: 0
-#        minutes: '*'
-#        then:
-#          - lambda: |-
-#              auto time_text = id(sntp_time).now().strftime("%H:%M");  
-#              id(disp1).set_component_text_printf("main.b5", time_text.c_str());  
-#              auto date_text = id(sntp_time).now().strftime("%d.%m.%Y");
-#              id(disp1).set_component_text_printf("main.b6", date_text.c_str()); 
 external_components:
   - source: github://pr#2956
     components: [nextion]
     refresh: 1h
 esp32:
   board: esp32dev
-
-# Enable Home Assistant API
-api:
-  encryption:
-    key: "hK4c2Gwp0pSSLZ6pnWPSTwdwugWZVP2PDQ69vwld9XE="
-  services:
-    # Service to play a song
-    - service: play_rtttl
-      variables:
-        song_str: string
-      then:
-        - rtttl.play:
-            rtttl: !lambda 'return song_str;'
-    - service: upload_tft
-      then:
-        - lambda: 'id(disp1)->upload_tft();'
 
 # Define some inputs
 script:
@@ -485,14 +457,7 @@ switch:
       number: 4
       inverted: true
     restore_mode: ALWAYS_ON
-#time:
-#  - platform: homeassistant
-#    id: homeassistant_time
-#    on_time:
-#      - seconds: 0
-#        minutes: /1
-#        then:
-#          - lambda: id(disp1).set_component_text_printf("main.b5", "%02i:%02i", id(homeassistant_time).now().hour, id(homeassistant_time).now().minute);
+
 number:
   platform: template
   name: $device_name Brightness
@@ -531,7 +496,7 @@ display:
   - platform: nextion
     id: disp1
     uart_id: tf_uart
-    tft_url: https://10.0.3.100:8123/local/bath3.tft
+    tft_url: https://github.com/Lastik-Lastikov/wb-nsp/blob/1932d98a9c7889467ab4a2f254a76198e5e3c097/bathroom.tft
     # A little fun...
     on_setup:
       then:
