@@ -22,14 +22,14 @@ setInterval( function() { dev["date_time/date"] = Date().substr(0, 10)}, 5000);
 defineVirtualDevice('nspbathroom', {
     title: 'NSP Bathroom' ,
     cells: {
-	   Brightness: {
+      Brightness: {
         title: "Яркость",
 	    type: "range",
 	    value: 100,
         max: 100,
         min: 0
 	    },
-       Backlight: {
+      Backlight: {
         title: "Подсветка",
 	    type: "switch",
 	    value: true
@@ -78,5 +78,5 @@ var motion_timer_id = null;
   });
 
 }
-makeMotionDetector("nsp_bedroom2_motion", 15000, "wb-msw-v3_140/Max Motion", "300", "nsp-bedroom2/Screen");
+makeMotionDetector("nspbathroom_motion", 15000, "wb-msw-v3_140/Max Motion", "300", "nspbathroom/Backlight");
 */
