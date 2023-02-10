@@ -1,15 +1,16 @@
 # Set some variables for convenience
 substitutions:
-  name: nspbathroom
-  device_name: "NSP Bathroom"
-# Enable logging
+  name: nspbathroom #должно совпадать с названием виртуального устройства в wb rules и быть уникальным
+  broker_ip: 10.0.3.116 #ip адрес Wirenboard
+  device_name: "NSP Bathroom" #Человекочитаемое название
+
 esphome:
   name: $name
   comment: $device_name
-  on_boot:
-    priority: 601
-    then:
-      - lambda: id(disp1).send_command_printf("DRAKJHSUYDGBNCJHGJKSHBDN");
+ # on_boot:
+ #   priority: 601
+ #   then:
+ #     - lambda: id(disp1).send_command_printf("DRAKJHSUYDGBNCJHGJKSHBDN");
 logger:
 ota:
   password: "33ba8da3afc16873ef9b270235710659"
@@ -22,7 +23,7 @@ wifi:
 #    gateway: 10.0.2.1
 #    subnet: 255.255.255.0
 mqtt:
-  broker: 10.0.3.116
+  broker: $broker_ip
   discovery: false
   id: mqtt_client
 # Передача статуса в MQTT
@@ -44,7 +45,7 @@ external_components:
 esp32:
   board: esp32dev
 
-# Define some inputs
+# Скрипты обновления данных на экране
 script:
   - id: update_room
     then:
@@ -59,6 +60,7 @@ script:
             id(disp1).set_component_picc("main.b4", id(Button4).state);
             id(disp1).set_component_picc("main.b5", id(Button5).state);  
         - script.execute: update_forecast
+ #скрипт обновления данных о погоде на экране   
   - id: update_forecast
     then:
         - lambda: |-
@@ -117,6 +119,7 @@ binary_sensor:
       then:
         - lambda: |-
             id(h1_slider_value).update();
+#обновляем положение слайдера при открытии выпадающего экрана
   - platform: nextion
     name: $device_name bar_page_enable
     page_id: 2
@@ -127,14 +130,16 @@ binary_sensor:
         - lambda: |-
             id(disp1).set_component_value("bar.h1", id(h1_slider_value_mqtt).state);
             id(disp1).set_component_value("bar.n1", id(h1_slider_value_mqtt).state);
+#обновляем  данные главного экрана при переходе на него
   - platform: nextion
-    name: $device_name bar_page_enable
+    name: $device_name main_page_enable
     page_id: 0
     component_id: 0
     internal: true
     on_release:
       then:
         - script.execute: update_room
+#Левая кнопка выключает 4 группы
   - platform: gpio
     name: $device_name Left Button
     pin:
@@ -148,6 +153,7 @@ binary_sensor:
             id(mqtt_client).publish("/devices/wb-mrgbw-d-fw3_182/controls/Channel 3 (G)/on", "0");
             id(mqtt_client).publish("/devices/wb-mrgbw-d-fw3_182/controls/Channel 2 (R)/on", "0");
             id(mqtt_client).publish("/devices/wb-mr6c_75/controls/K1/on", "0");    
+#Правая кнопка включает 4 группы
   - platform: gpio
     name: $device_name Right Button
     pin:
@@ -160,10 +166,12 @@ binary_sensor:
             id(mqtt_client).publish("/devices/wb-mrgbw-d-fw3_182/controls/Channel 3 (G)/on", "1");
             id(mqtt_client).publish("/devices/wb-mrgbw-d-fw3_182/controls/Channel 2 (R)/on", "1");
             id(mqtt_client).publish("/devices/wb-mr6c_75/controls/K1/on", "1");  
+#Нажатие на кнопки на экране переключает состояние выходов на противоположное текущему:
+# споты ванна
   - platform: nextion
-  # споты ванна
+
     name: $device_name B0
-    page_id: 0
+    page_id: 0 #id страницы в nextion
     component_id: 1
     on_press:
       then:
@@ -174,8 +182,9 @@ binary_sensor:
             else {
                 id(mqtt_client).publish("/devices/wb-mdm3_216/controls/K1/on", "1");
             }
-  - platform: nextion
-  # зеркало ванна
+# зеркало ванна
+ - platform: nextion
+
     name: $device_name B1
     page_id: 0
     component_id: 2
@@ -188,8 +197,9 @@ binary_sensor:
             else {
                 id(mqtt_client).publish("/devices/wb-mr6c_75/controls/K1/on", "1");
             }
+# вытяжка ванна
   - platform: nextion
-    # вытяжка ванна
+
     name: $device_name B2
     page_id: 0
     component_id: 3
@@ -202,8 +212,8 @@ binary_sensor:
             else {
                 id(mqtt_client).publish("/devices/wb-mr6c_75/controls/K2/on", "1");
             }
-  - platform: nextion
-    # подсветка ванна
+# подсветка ванна
+ - platform: nextion
     name: $device_name B3
     page_id: 0
     component_id: 4
@@ -297,7 +307,7 @@ sensor:
             id(mqtt_client).publish("/devices/wb-mdm3_216/controls/Channel 1/on", esphome::to_string(id(h1_slider_value).state));
   - platform: mqtt_subscribe
     internal: true
-    name: "h1_slider_value_mqtt"
+    name: "$device_name h1_slider_value_mqtt"
     id: h1_slider_value_mqtt
     topic: /devices/wb-mdm3_216/controls/Channel 1
     on_value:
@@ -307,7 +317,7 @@ sensor:
             id(disp1).set_component_value("bar.n1", id(h1_slider_value_mqtt).state);
   - platform: mqtt_subscribe
     internal: true
-    name: "Button0"
+    name: "$device_name Button0"
     id: Button0
     topic: /devices/wb-mdm3_216/controls/K1
     on_value:
@@ -316,7 +326,7 @@ sensor:
             id(disp1).set_component_picc("main.b0", id(Button0).state);
   - platform: mqtt_subscribe
     internal: true
-    name: "Button1"
+    name: "$device_name Button1"
     id: Button1
     topic: /devices/wb-mr6c_75/controls/K1
     on_value:
@@ -325,7 +335,7 @@ sensor:
             id(disp1).set_component_picc("main.b1", id(Button1).state);
   - platform: mqtt_subscribe
     internal: true
-    name: "Button2"
+    name: "$device_name Button2"
     id: Button2
     topic: /devices/wb-mr6c_75/controls/K2
     on_value:
@@ -334,7 +344,7 @@ sensor:
             id(disp1).set_component_picc("main.b2", id(Button2).state);
   - platform: mqtt_subscribe
     internal: true
-    name: "Button3"
+    name: "$device_name Button3"
     id: Button3
     topic: /devices/wb-mrgbw-d-fw3_182/controls/Channel 3 (G)
     on_value:
@@ -343,7 +353,7 @@ sensor:
             id(disp1).set_component_picc("main.b3", id(Button3).state);
   - platform: mqtt_subscribe
     internal: true
-    name: "Button3_1"
+    name: "$device_name Button3_1"
     id: Button3_1
     topic: /devices/wb-mrgbw-d-fw3_182/controls/Channel 2 (R)
     on_value:
@@ -352,7 +362,7 @@ sensor:
             id(disp1).set_component_picc("main.b3", id(Button3_1).state);
   - platform: mqtt_subscribe
     internal: true
-    name: "Button4"
+    name: "$device_name Button4"
     id: Button4
     topic: /devices/wb-mdm3_27/controls/K3
     on_value:
@@ -361,35 +371,35 @@ sensor:
             id(disp1).set_component_picc("main.b4", id(Button4).state);
   - platform: mqtt_subscribe
     internal: true
-    name: "Button5"
+    name: "$device_name Button5"
     id: Button5
     topic: /devices/wb-mdm3_27/controls/K2/on
     on_value:
       then: 
         - lambda: |-
             id(disp1).set_component_picc("main.b5", id(Button5).state);
-#    Забираем параметры яркости экрана из виртуального устройства wb и меняем яркость на панели
+#Забираем параметры яркости экрана из виртуального устройства wb и меняем яркость на панели
 #  - platform: mqtt_subscribe
 #    internal: true
-#    name: "${name}_backlight"
-#    id: ${name}_backlight
-#    topic: /devices/${name}/controls/Backlight
+#    name: "$device_name Brightness"
+#    id: Brightness
+#    topic: /devices/${name}/controls/Brightness
 #    on_value:
 #      then: 
 #        - lambda: |-
-#            if (id(${name}_screen).state == 1) {
-#            id(disp1).set_backlight_brightness(id(${name}_backlight).state/100); 
+#            if (id(Backlight).state == 1) {
+#            id(disp1).set_backlight_brightness(id(Brightness).state/100); 
 #            }
 #Забираем параметры выключателя режима "Сна" из виртуального устройства wb
   - platform: mqtt_subscribe
     internal: true
-    name: "${name}_screen"
-    id: ${name}_screen
-    topic: /devices/${name}/controls/Screen
+    name: "$device_name Backlight"
+    id: Backlight
+    topic: /devices/${name}/controls/Backlight
     on_value:
       then: 
         - lambda: |-
-            if (id(${name}_screen).state == 1) { 
+            if (id(Backlight).state == 1) { 
                 id(disp1).goto_page("main");
                 id(disp1).set_component_text("main.t0", id(ha_forecast_temp).state.c_str());
                 id(disp1).set_component_text_printf("main.b10", id(wb_date).state.c_str()); 
@@ -400,7 +410,7 @@ sensor:
                 id(disp1).set_component_picc("main.b3", id(Button3).state);   
                 id(disp1).set_component_picc("main.b4", id(Button4).state);
                 id(disp1).set_component_picc("main.b5", id(Button5).state);
-                // id(disp1).set_backlight_brightness(id(${name}_backlight).state/100); 
+                // id(disp1).set_backlight_brightness(id(Brightness).state/100); 
  
               }
             else {
@@ -435,26 +445,12 @@ sensor:
   # Pin 4 always needs to be on to power up the display
 switch:
   - platform: gpio
-    name: "ScreenPower"
+    name: "$device_name ScreenPower"
     id: screen_power
     pin:
       number: 4
       inverted: true
     restore_mode: ALWAYS_ON
-
-number:
-  platform: template
-  name: $device_name Brightness
-  id: brightness
-  entity_category: config
-  unit_of_measurement: '%'
-  min_value: 0
-  max_value: 100
-  step: 1
-  initial_value: 30
-  set_action:
-    then:
-      - lambda: 'id(disp1).set_backlight_brightness(x/100);'
 
 # Configure the internal bleeper
 output:
@@ -481,12 +477,4 @@ display:
     id: disp1
     uart_id: tf_uart
     tft_url: https://github.com/Lastik-Lastikov/wb-nsp/blob/1932d98a9c7889467ab4a2f254a76198e5e3c097/bathroom.tft
-    # A little fun...
-    on_setup:
-      then:
-        - number.set:
-            id: brightness
-            value: 30
- #       - lambda: |-
- #           id(disp1).send_command_print("main.temp_room.txt", "%.1f ""\xb0""F", id(current_temperature).state);
-        #- rtttl.play: "twobits:d=4,o=5,b=220:c6,8g,8g,a,g,p,b,c6"
+
