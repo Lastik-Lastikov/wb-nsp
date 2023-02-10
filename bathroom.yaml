@@ -183,8 +183,7 @@ binary_sensor:
                 id(mqtt_client).publish("/devices/wb-mdm3_216/controls/K1/on", "1");
             }
 # зеркало ванна
- - platform: nextion
-
+  - platform: nextion
     name: $device_name B1
     page_id: 0
     component_id: 2
@@ -213,7 +212,7 @@ binary_sensor:
                 id(mqtt_client).publish("/devices/wb-mr6c_75/controls/K2/on", "1");
             }
 # подсветка ванна
- - platform: nextion
+  - platform: nextion
     name: $device_name B3
     page_id: 0
     component_id: 4
