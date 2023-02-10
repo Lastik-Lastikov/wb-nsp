@@ -1,3 +1,7 @@
+
+
+https://user-images.githubusercontent.com/18034395/218068491-e400a1e3-e3a2-40d2-9a51-b6e7c6bbb939.mp4
+
 # wb-nsp
 Wirenboard &amp; Sonoff NSPanel  through ESPHOME intrgration 
 Попытка состыковать Wirenboard  и Sonoff NSPanel через прошивку ESPHOME 
