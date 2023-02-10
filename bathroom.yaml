@@ -1,8 +1,7 @@
 # Set some variables for convenience
 substitutions:
-  name: nsp_bathroom
-  device_name: "nsp_bathroom"
-  prefix: "nsp_bathroom" 
+  name: nspbathroom
+  device_name: "NSP Bathroom"
 # Enable logging
 esphome:
   name: $name
@@ -26,18 +25,17 @@ mqtt:
   broker: 10.0.3.116
   discovery: false
   id: mqtt_client
-  topic_prefix: "nsp_bathroom" 
 # Передача статуса в MQTT
   birth_message:
-      topic: "esphome/nsp_bathroom/text_sensor/status/state"
+      topic: "/devices/${name}/text_sensor/status/state"
       payload: online
 
   will_message:
-      topic: "esphome/nsp_bathroom/text_sensor/status/state"
+      topic: "devices/${name}/text_sensor/status/state"
       payload: offline
 
   shutdown_message :
-      topic: "esphome/nsp_bathroom/text_sensor/status/state"
+      topic: "devices/${name}/text_sensor/status/state"
       payload: shutdown
 external_components:
   - source: github://pr#2956
@@ -255,7 +253,7 @@ binary_sensor:
     on_press:
       then:
         - lambda: |-
-            id(mqtt_client).publish("/devices/nsp_bathroom/controls/Screen/on", "1");
+            id(mqtt_client).publish("/devices/${name}/controls/Screen/on", "1");
  #       - script.execute: update_room     
 text_sensor:
   - platform: mqtt_subscribe
@@ -373,25 +371,25 @@ sensor:
 #    Забираем параметры яркости экрана из виртуального устройства wb и меняем яркость на панели
 #  - platform: mqtt_subscribe
 #    internal: true
-#    name: "nsp_bathroom_backlight"
-#    id: nsp_bathroom_backlight
-#    topic: /devices/nsp_bathroom/controls/Backlight
+#    name: "${name}_backlight"
+#    id: ${name}_backlight
+#    topic: /devices/${name}/controls/Backlight
 #    on_value:
 #      then: 
 #        - lambda: |-
-#            if (id(nsp_bathroom_screen).state == 1) {
-#            id(disp1).set_backlight_brightness(id(nsp_bathroom_backlight).state/100); 
+#            if (id(${name}_screen).state == 1) {
+#            id(disp1).set_backlight_brightness(id(${name}_backlight).state/100); 
 #            }
 #Забираем параметры выключателя режима "Сна" из виртуального устройства wb
   - platform: mqtt_subscribe
     internal: true
-    name: "nsp_bathroom_screen"
-    id: nsp_bathroom_screen
-    topic: /devices/nsp_bathroom/controls/Screen
+    name: "${name}_screen"
+    id: ${name}_screen
+    topic: /devices/${name}/controls/Screen
     on_value:
       then: 
         - lambda: |-
-            if (id(nsp_bathroom_screen).state == 1) { 
+            if (id(${name}_screen).state == 1) { 
                 id(disp1).goto_page("main");
                 id(disp1).set_component_text("main.t0", id(ha_forecast_temp).state.c_str());
                 id(disp1).set_component_text_printf("main.b10", id(wb_date).state.c_str()); 
@@ -402,7 +400,7 @@ sensor:
                 id(disp1).set_component_picc("main.b3", id(Button3).state);   
                 id(disp1).set_component_picc("main.b4", id(Button4).state);
                 id(disp1).set_component_picc("main.b5", id(Button5).state);
-                // id(disp1).set_backlight_brightness(id(nsp_bathroom_backlight).state/100); 
+                // id(disp1).set_backlight_brightness(id(${name}_backlight).state/100); 
  
               }
             else {
