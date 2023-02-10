@@ -1,4 +1,5 @@
 
+
 Принимаю PR с оптимизацией. 
 
 
@@ -24,3 +25,4 @@ Wirenboard &amp; Sonoff NSPanel  through ESPHOME intrgration
 
 
 https://user-images.githubusercontent.com/18034395/218068491-e400a1e3-e3a2-40d2-9a51-b6e7c6bbb939.mp4
+![sample](https://user-images.githubusercontent.com/18034395/218071745-f7540f69-5918-4cdc-9eeb-7e2cd0362e44.png)
