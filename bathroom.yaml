@@ -370,23 +370,7 @@ sensor:
       then: 
         - lambda: |-
             id(disp1).set_component_picc("main.b5", id(Button5).state);
-#  - platform: mqtt_subscribe
-#    name: "bedroom2_lux_sens"
-#    id: bedroom2_lux_sens
-#    topic: /devices/wb-msw-v3_140/controls/Illuminance
-#  - platform: mqtt_subscribe
-#    name: "bedroom2_motion_sens"
-#    id: bedroom2_motion_sens
-#    topic: /devices/wb-msw-v3_140/controls/Max Motion
-#    on_value:
-#      then: 
-#        - lambda: |-
-#            if (id(Buttonedroom2_motion_sens).state > 160) {
-#                if (id(Buttonedroom2_lux_sens).state > 20) {
-#                id(disp1).set_backlight_brightness(1.0);
-#                } else {id(disp1).set_backlight_brightness(0.2);}
-#            id(disp1).set_component_value("main.sleep_display.en", 1);
-#            }
+#    Забираем параметры яркости экрана из виртуального устройства wb и меняем яркость на панели
 #  - platform: mqtt_subscribe
 #    internal: true
 #    name: "nsp_bathroom_backlight"
@@ -398,6 +382,7 @@ sensor:
 #            if (id(nsp_bathroom_screen).state == 1) {
 #            id(disp1).set_backlight_brightness(id(nsp_bathroom_backlight).state/100); 
 #            }
+#Забираем параметры выключателя режима "Сна" из виртуального устройства wb
   - platform: mqtt_subscribe
     internal: true
     name: "nsp_bathroom_screen"
@@ -417,6 +402,7 @@ sensor:
                 id(disp1).set_component_picc("main.b3", id(Button3).state);   
                 id(disp1).set_component_picc("main.b4", id(Button4).state);
                 id(disp1).set_component_picc("main.b5", id(Button5).state);
+                // id(disp1).set_backlight_brightness(id(nsp_bathroom_backlight).state/100); 
  
               }
             else {
