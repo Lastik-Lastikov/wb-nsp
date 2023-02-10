@@ -1,6 +1,6 @@
 
 
-https://user-images.githubusercontent.com/18034395/218068491-e400a1e3-e3a2-40d2-9a51-b6e7c6bbb939.mp4
+
 
 # wb-nsp
 Wirenboard &amp; Sonoff NSPanel  through ESPHOME intrgration 
@@ -17,3 +17,6 @@ Wirenboard &amp; Sonoff NSPanel  through ESPHOME intrgration
 1) Экран nextion - глупый выключатель, набор кнопок с простой кастомзацией и минимумом логки в прошивке экрана с целью макисмальной доступности
 2) ESPHome - так же минимальный набор функций обеспечаивющих плучение/передачу и конвертацию данных от экрана в mqtt брокер WB и обратно без лишних автоматизаций.
 3) Обработка сложных событий, скрипты, сценарии - все раелизуется через wb-rules
+
+
+https://user-images.githubusercontent.com/18034395/218068491-e400a1e3-e3a2-40d2-9a51-b6e7c6bbb939.mp4
