@@ -104,7 +104,7 @@ display:
   - platform: nextion
     id: disp1
     uart_id: tf_uart
-    tft_url: https://10.0.3.100:8123/local/bath3.tft
+    tft_url: https://github.com/Lastik-Lastikov/wb-nsp/blob/1932d98a9c7889467ab4a2f254a76198e5e3c097/bathroom.tft
     on_setup:
       then:
         - number.set:
