@@ -6,7 +6,7 @@
       then:
         - lambda: |-
             if (id(${Button_id}).state == 1) { 
-                id(mqtt_client).publish("${${Button_id}_topic}/on", "${on_messqge}");
+                id(mqtt_client).publish("${${Button_id}_topic}/on", "${on_message}");
               }
             else {
                 id(mqtt_client).publish("${${Button_id}_topic}/on", "${off_message}");

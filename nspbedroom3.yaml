@@ -1,7 +1,8 @@
-<<: !include https://github.com/Lastik-Lastikov/wb-nsp/blob/8ad7416803a74131ea1ef1183746c12f2a322089/.universal_config.yaml
+<<: !include .universal_config.yaml
 substitutions:
   name: "nspbedroom3" #должно совпадать с названием виртуального устройства в wb rules и быть уникальным
   broker_ip: 10.0.3.116 #ip адрес Wirenboard
+  local_ip: 10.0.2.42
   device_name: "NSP Bedroom3" #Человекочитаемое название
   B0_topic: "/devices/wb-mdm3_97/controls/K3"
   B0_text: "Споты"
@@ -186,20 +187,21 @@ binary_sensor:
         - lambda: 'id(disp1)->upload_tft();' 
 
 #Нажатие на кнопки на экране переключает состояние выходов на противоположное текущему:
-# споты 
-  - platform: nextion
-    name: $device_name B0
-    page_id: 2 #id страницы в nextion
-    component_id: 11
-    on_press:
-      then:
-        - lambda: |-
-            if (id(Button0).state == 1) { 
-                id(mqtt_client).publish("${B0_topic}/on", "0");
-              }
-            else {
-                id(mqtt_client).publish("${B0_topic}/on", "1");
-            } 
+# споты
+<<: !include { file: .nextion_button_publish.yaml, vars: { page_id: 2, component_id: 11, Button_id: B0, on_message: 1, off_message: 0} }
+#  - platform: nextion
+#    name: $device_name B0
+#    page_id: 2 #id страницы в nextion
+#    component_id: 11
+#    on_press:
+#      then:
+#        - lambda: |-
+#            if (id(Button0).state == 1) { 
+#                id(mqtt_client).publish("${B0_topic}/on", "0");
+#              }
+#            else {
+#                id(mqtt_client).publish("${B0_topic}/on", "1");
+#            } 
   - platform: nextion
     name: $device_name B1
     page_id: 2
@@ -329,12 +331,12 @@ sensor:
   - platform: mqtt_subscribe
     internal: true
     name: "$device_name Button0"
-    id: Button0
+    id: B0
     topic: ${B0_topic}
     on_value:
       then: 
         - lambda: |-
-              id(disp1).set_component_value ("main.bt0", id(Button0).state);   
+              id(disp1).set_component_value ("main.bt0", id(B0).state);   
   - platform: mqtt_subscribe
     internal: true
     name: "$device_name Button1"
