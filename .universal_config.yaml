@@ -1,0 +1,33 @@
+esphome:
+  name: $name
+logger:
+ota:
+  password: "325188c05c84a379893d97d6ed4e294e"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  use_address: ${local_ip}
+mqtt:
+  broker: $broker_ip
+  discovery: false
+  id: mqtt_client
+  topic_prefix:  "esphome/${name}"
+# Передача статуса в MQTT
+  birth_message:
+      topic: "esphome/${name}/text_sensor/status/state"
+      payload: online
+
+  will_message:
+      topic: "esphome/${name}/text_sensor/status/state"
+      payload: offline
+
+  shutdown_message :
+      topic: "esphome/${name}/text_sensor/status/state"
+      payload: shutdown
+external_components:
+  - source: github://pr#2956
+    components: [nextion]
+    refresh: 1h
+esp32:
+  board: esp32dev

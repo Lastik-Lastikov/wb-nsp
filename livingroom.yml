@@ -1,79 +1,97 @@
-<<: !include .univerasal.config.yaml
+# Set some variables for convenience
 substitutions:
-  name: "nspbedroom3" #должно совпадать с названием виртуального устройства в wb rules и быть уникальным
+  name: "nspbedroom1" #должно совпадать с названием виртуального устройства в wb rules и быть уникальным
   broker_ip: 10.0.3.116 #ip адрес Wirenboard
-  device_name: "NSP Bedroom3" #Человекочитаемое название
-  B0_topic: "/devices/wb-mdm3_97/controls/K3"
-  B0_text: "Споты"
-  B1_topic: "/devices/wb-mr6c_113/controls/K3"
-  B1_text: "Люстра"
-  B2_topic: "/devices/wb-mdm3_97/controls/K3"
-  B2_text: "Шторы"
-  B3_topic: "/devices/wb-mr6c_113/controls/K3"
-  B3_text: "Подсвтека штор"
+  device_name: "NSP Bedroom1" #Человекочитаемое название
+  B0_topic: "/devices/wb-mdm3_97/controls/K1"
+  B0_text: ""
+  B1_topic: "/devices/wb-mr6c_113/controls/K1"
+  B1_text: ""
+  B2_topic: "/devices/wb-mr6c_113/controls/K2"
+  B2_text: ""
+  B3_topic: "/devices/wb-mrgbw-d-fw3_182/controls/Channel 2 (R)"
+  B3_text: ""
   B4_topic: ""
   B4_text: ""
   B5_topic: ""
   B5_text: ""
-  H0_topic: "/devices/wb-mdm3_97/controls/Channel 3"
-  H0_text: "Споты"
+  H0_topic: ""
+  H0_text: "Яркость0"
   H1_topic: "/devices/wb-mdm3_97/controls/Channel 1"
-  H1_text: "Подсветка штор"
+  H1_text: "Яркость спотов"
   H2_topic: ""
-  H2_text: ""
+  H2_text: "Яркость2"
   H3_topic: ""
-  H3_text: ""
-  Left_B_topic: "/devices/wb-mdm3_97/controls/K3"
-  Right_B_topic: "/devices/wb-mr6c_113/controls/K3"
+  H3_text: "Яркость3"
   date_topic: "/devices/date_time/controls/date"
   time_topic: "/devices/date_time/controls/time"
   outside_temp_topic: "/devices/YandexWeather/controls/temp"
 #  outside_feel_temp_topic: "/devices/YandexWeather/controls/temp_feels_like"
   weather_text_topic: "/devices/YandexWeather/controls/condition_ru"
   weather_topic: "/devices/YandexWeather/controls/condition"
+esphome:
+  name: $name
+  comment: $device_name
+logger:
+ota:
+  password: "325188c05c84a379893d97d6ed4e294e"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+#  use_address: 10.0.2.94
+  ap:
+    ssid: "NSP ${name}"
+    password: 123qweASD!
+captive_portal:
+#  manual_ip:
+#    static_ip: 10.0.2.94
+#    gateway: 10.0.2.1
+#    subnet: 255.255.255.0
+#    dns1: 8.8.4.4
+mqtt:
+  broker: $broker_ip
+  discovery: false
+  id: mqtt_client
+  topic_prefix:  "esphome/${name}"
+# Передача статуса в MQTT
+  birth_message:
+      topic: "esphome/${name}/text_sensor/status/state"
+      payload: online
+
+  will_message:
+      topic: "esphome/${name}/text_sensor/status/state"
+      payload: offline
+
+  shutdown_message :
+      topic: "esphome/${name}/text_sensor/status/state"
+      payload: shutdown
+external_components:
+  - source: github://pr#2956
+    components: [nextion]
+    refresh: 1h
+esp32:
+  board: esp32dev
 
 # Скрипты обновления данных на экране
 script:
-  - id: update_bar
-    then:
-        - lambda: |-
-            if ("${H0_text}" != "") {
-            id(disp1).send_command_printf("vis t0,1");
-            id(disp1).send_command_printf("vis n0,1");  
-            id(disp1).send_command_printf("vis h0,1");  
-            }
-            if ("${H1_text}" != "") {
-            id(disp1).send_command_printf("vis t1,1");
-            id(disp1).send_command_printf("vis n1,1");  
-            id(disp1).send_command_printf("vis h1,1");  
-            }
-            if ("${H2_text}" != "") {
-            id(disp1).send_command_printf("vis t2,1");
-            id(disp1).send_command_printf("vis n2,1");  
-            id(disp1).send_command_printf("vis h2,1");  
-            }
-            if ("${H3_text}" != "") {
-            id(disp1).send_command_printf("vis t3,1");
-            id(disp1).send_command_printf("vis n3,1");  
-            id(disp1).send_command_printf("vis h3,1");  
-            }           
   - id: update_room
     then:
         - lambda: |-
+            id(disp1).set_component_text("main.b0", "${B0_text}");
+            id(disp1).set_component_text("main.b1", "${B1_text}");
+            id(disp1).set_component_text("main.b2", "${B2_text}");
+            id(disp1).set_component_text("main.b3", "${B3_text}");
             id(disp1).set_component_text("bar.t0", "${H0_text}");
             id(disp1).set_component_text("bar.t1", "${H1_text}");
             id(disp1).set_component_text("bar.t2", "${H2_text}");
             id(disp1).set_component_text("bar.t3", "${H3_text}");
-            id(disp1).set_component_text("main.bt0", "${B0_text}");
-            id(disp1).set_component_text("main.bt1", "${B1_text}");
-            id(disp1).set_component_text("main.bt2", "${B2_text}");
-            id(disp1).set_component_text("main.bt3", "${B3_text}");         
             id(disp1).set_component_text_printf("main.b10", id(wb_date).state.c_str()); 
             id(disp1).set_component_text_printf("main.b9", id(wb_time).state.c_str());             
-            id(disp1).set_component_value ("main.bt0", id(Button0).state);
-            id(disp1).set_component_value ("main.bt1", id(Button1).state);
-            id(disp1).set_component_value ("main.bt2", id(Button2).state);
-            id(disp1).set_component_value ("main.bt3", id(Button3).state);            
+            id(disp1).set_component_picc("main.b0", id(Button0).state);           
+            id(disp1).set_component_picc("main.b1", id(Button1).state);            
+#            id(disp1).set_component_picc("main.b2", id(Button2).state);           
+#            id(disp1).set_component_picc("main.b3", id(Button3).state);   
         - script.execute: update_weather
  #скрипт обновления данных о погоде на экране   
   - id: update_weather
@@ -131,14 +149,16 @@ binary_sensor:
         - lambda: |-
             id(h1_slider_value).update();
 #обновляем положение слайдера при открытии выпадающего экрана
-  - platform: nextion
-    name: $device_name bar_page_enable
-    page_id: 4
-    component_id: 0
-    internal: true
-    on_press:
-      then:
-        - script.execute: update_bar
+#  - platform: nextion
+#    name: $device_name bar_page_enable
+#    page_id: 4
+#    component_id: 0
+#    internal: true
+#    on_release:
+#      then:
+#        - lambda: |-
+#            id(disp1).set_component_value("bar.h1", id(h1_slider_value_mqtt).state);
+#            id(disp1).set_component_value("bar.n1", id(h1_slider_value_mqtt).state);
 #обновляем  данные главного экрана при переходе на него
 #  - platform: nextion
 #    name: $device_name main_page_enable
@@ -156,11 +176,11 @@ binary_sensor:
       inverted: true
     on_click:
         - lambda: |-
-            if (id(Left_Button).state == 1) { 
-                id(mqtt_client).publish("${Left_B_topic}/on", "0");
+            if (id(Button0).state == 1) { 
+                id(mqtt_client).publish("${B0_topic}/on", "0");
               }
             else {
-                id(mqtt_client).publish("${Left_B_topic}/on", "1");
+                id(mqtt_client).publish("${B0_topic}/on", "1");
             } 
 #Правая кнопка
   - platform: gpio
@@ -171,11 +191,11 @@ binary_sensor:
     on_click:
 #         - lambda: 'id(disp1)->upload_tft();' 
         - lambda: |-
-            if (id(Right_Button).state == 1) { 
-                id(mqtt_client).publish("${Right_B_topic}/on", "0");
+            if (id(Button1).state == 1) { 
+                id(mqtt_client).publish("${B1_topic}/on", "0");
               }
             else {
-                id(mqtt_client).publish("${Right_B_topic}/on", "1");
+                id(mqtt_client).publish("${B1_topic}/on", "1");
             }
   - platform: nextion
     name: $device_name udp
@@ -188,9 +208,10 @@ binary_sensor:
 #Нажатие на кнопки на экране переключает состояние выходов на противоположное текущему:
 # споты 
   - platform: nextion
+
     name: $device_name B0
     page_id: 2 #id страницы в nextion
-    component_id: 11
+    component_id: 1
     on_press:
       then:
         - lambda: |-
@@ -200,10 +221,11 @@ binary_sensor:
             else {
                 id(mqtt_client).publish("${B0_topic}/on", "1");
             } 
+# люстра
   - platform: nextion
     name: $device_name B1
     page_id: 2
-    component_id: 12
+    component_id: 2
     on_press:
       then:
         - lambda: |-
@@ -213,33 +235,35 @@ binary_sensor:
             else {
                 id(mqtt_client).publish("${B1_topic}/on", "1");
             }
-  - platform: nextion
-
-    name: $device_name B2
-    page_id: 2
-    component_id: 13
-    on_press:
-      then:
-        - lambda: |-
-            if (id(Button2).state == 1) { 
-                id(mqtt_client).publish("${B2_topic}/on", "0");
-              }
-            else {
-                id(mqtt_client).publish("${B2_topic}/on", "1");
-            }
-  - platform: nextion
-    name: $device_name B3
-    page_id: 2
-    component_id: 14
-    on_press:
-      then:
-        - lambda: |-
-            if (id(Button3).state == 1 or id(Button3).state == 1) { 
-                id(mqtt_client).publish("${B3_topic}/on", "0");
-              }
-            else {
-                id(mqtt_client).publish("${B3_topic}/on", "1");
-            }
+# шторы
+#  - platform: nextion
+#
+#    name: $device_name B2
+#    page_id: 2
+#    component_id: 3
+#    on_press:
+#      then:
+#        - lambda: |-
+#            if (id(Button2).state == 1) { 
+#                id(mqtt_client).publish("${B2_topic}/on", "0");
+#              }
+#            else {
+#                id(mqtt_client).publish("${B2_topic}/on", "1");
+#           }
+# подсветка штор
+#  - platform: nextion
+#    name: $device_name B3
+#    page_id: 2
+#    component_id: 4
+#    on_press:
+#      then:
+#        - lambda: |-
+#            if (id(Button3).state == 1 or id(Button3_1).state == 1) { 
+#                id(mqtt_client).publish("${B3_topic}/on", "0");
+#              }
+#            else {
+#                id(mqtt_client).publish("${B3_topic}/on", "1");
+#            }
   - platform: nextion
     name: $device_name screensaver
     page_id: 3
@@ -318,23 +342,13 @@ sensor:
             id(disp1).set_component_value("bar.n1", id(h1_slider_value_mqtt).state);
   - platform: mqtt_subscribe
     internal: true
-    name: "$device_name Left_Button"
-    id: Left_Button
-    topic: ${Left_B_topic}
-  - platform: mqtt_subscribe
-    internal: true
-    name: "$device_name Right_Button"
-    id: Right_Button
-    topic: ${Right_B_topic}
-  - platform: mqtt_subscribe
-    internal: true
     name: "$device_name Button0"
     id: Button0
     topic: ${B0_topic}
     on_value:
       then: 
         - lambda: |-
-              id(disp1).set_component_value ("main.bt0", id(Button0).state);   
+            id(disp1).set_component_picc("main.b0", id(Button0).state);
   - platform: mqtt_subscribe
     internal: true
     name: "$device_name Button1"
@@ -343,25 +357,25 @@ sensor:
     on_value:
       then: 
         - lambda: |-
-              id(disp1).set_component_value ("main.bt1", id(Button1).state);   
-  - platform: mqtt_subscribe
-    internal: true
-    name: "$device_name Button2"
-    id: Button2
-    topic: ${B2_topic}
-    on_value:
-      then: 
-        - lambda: |-
-              id(disp1).set_component_value ("main.bt2", id(Button2).state);   
-  - platform: mqtt_subscribe
-    internal: true
-    name: "$device_name Button3"
-    id: Button3
-    topic: ${B3_topic}
-    on_value:
-      then: 
-        - lambda: |-
-              id(disp1).set_component_value ("main.bt3", id(Button3).state);  
+            id(disp1).set_component_picc("main.b1", id(Button1).state);
+#  - platform: mqtt_subscribe
+#    internal: true
+#    name: "$device_name Button2"
+#    id: Button2
+#    topic: ${B2_topic}
+#    on_value:
+#      then: 
+#        - lambda: |-
+#            id(disp1).set_component_picc("main.b2", id(Button2).state);
+#  - platform: mqtt_subscribe
+#    internal: true
+#    name: "$device_name Button3"
+#    id: Button3
+#    topic: ${B3_topic}
+#    on_value:
+#      then: 
+#        - lambda: |-
+#            id(disp1).set_component_picc("main.b3", id(Button3).state);
 #Забираем параметры яркости экрана из виртуального устройства wb и меняем яркость на панели
 #  - platform: mqtt_subscribe
 #    internal: true
@@ -457,7 +471,7 @@ display:
   - platform: nextion
     id: disp1
     uart_id: tf_uart
-    tft_url: https://10.0.3.100:8123/local/bedroom3.tft
+    tft_url: https://www.lastik-lastikov.ru:8123/local/bedroom1.tft
     on_setup:
       then:
         - lambda: id(disp1).send_command_printf("page 1");
