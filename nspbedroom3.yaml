@@ -1,4 +1,4 @@
-<<: !include .univerasal.config.yaml
+<<: !include https://github.com/Lastik-Lastikov/wb-nsp/blob/8ad7416803a74131ea1ef1183746c12f2a322089/.universal_config.yaml
 substitutions:
   name: "nspbedroom3" #должно совпадать с названием виртуального устройства в wb rules и быть уникальным
   broker_ip: 10.0.3.116 #ip адрес Wirenboard

@@ -1,0 +1,13 @@
+  - platform: nextion
+    name: $device_name ${Button_id}
+    page_id: ${page_id)
+    component_id: ${component_id}
+    on_press:
+      then:
+        - lambda: |-
+            if (id(${Button_id}).state == 1) { 
+                id(mqtt_client).publish("${${Button_id}_topic}/on", "${on_messqge}");
+              }
+            else {
+                id(mqtt_client).publish("${${Button_id}_topic}/on", "${off_message}");
+            }
